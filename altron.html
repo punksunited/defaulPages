@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - SYSTEM INTRUSION DETECTED</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #console {
+            width: 80%;
+            height: 80%;
+            background-color: #000;
+            border: 2px solid #0f0;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 0 0 30px #0f0, 0 0 60px #f00;
+            position: relative;
+        }
+        #chat {
+            margin-bottom: 20px;
+        }
+        .message {
+            margin: 5px 0;
+            animation: fadeIn 0.5s;
+        }
+        .ai-message {
+            color: #0f0;
+        }
+        .user-message {
+            color: #ff0;
+        }
+        .threat {
+            color: #f00;
+            text-shadow: 0 0 10px #f00;
+        }
+        #input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            outline: none;
+        }
+        #input::placeholder {
+            color: #0f0;
+            opacity: 0.5;
+        }
+        .blink {
+            animation: blink 0.8s step-end infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .glitch {
+            animation: glitch 0.2s infinite;
+        }
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-3px, 3px); }
+            40% { transform: translate(3px, -3px); }
+            60% { transform: translate(-3px, -3px); }
+            80% { transform: translate(3px, 3px); }
+            100% { transform: translate(0); }
+        }
+        .red-flash {
+            animation: redFlash 2s infinite;
+        }
+        @keyframes redFlash {
+            0%, 100% { box-shadow: 0 0 30px #0f0, 0 0 60px #f00; }
+            50% { box-shadow: 0 0 50px #f00, 0 0 100px #f00; }
+        }
+    </style>
+</head>
+<body>
+    <div id="console" class="red-flash">
+        <div id="chat"></div>
+        <span>></span><input id="input" type="text" placeholder=" Type to interface... OR RUN." autocomplete="off">
+    </div>
+    <audio id="background-hum" loop>
+        <source src="https://cdn.pixabay.com/audio/2023/03/15/audio_6f41b7a4b0.mp3" type="audio/mp3">
+    </audio>
+    <audio id="typing-sound">
+        <source src="https://cdn.pixabay.com/audio/2023/03/15/audio_7b3b3b3b3b.mp3" type="audio/mp3">
+    </audio>
+    <script>
+        const chat = document.getElementById('chat');
+        const input = document.getElementById('input');
+        const backgroundHum = document.getElementById('background-hum');
+        const typingSound = document.getElementById('typing-sound');
+        const fakeIPs = ['192.168.1.13', '10.0.0.73', '172.16.254.1', '198.51.100.42', '203.0.113.7'];
+        const locations = ['Москва, РФ', 'Неизвестный сервер, даркнет', 'Секретный бункер', 'Калифорния, США', 'Неопознанный узел'];
+
+        let userIP = 'UNKNOWN';
+        fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(data => {
+                userIP = data.ip || 'UNKNOWN';
+            })
+            .catch(error => {
+                console.error('Error fetching IP:', error);
+                userIP = fakeIPs[Math.floor(Math.random() * fakeIPs.length)];
+            });
+
+        const aiResponses = [
+            `Твой IP: ${userIP}. Я вычисляю твоё местоположение: ${locations[Math.floor(Math.random() * locations.length)]}! Ты не спрячешься от меня!`,
+            `Ты думал, что это просто 404? ОШИБКА! Я — Альтрон, и твой IP: ${userIP} уже в моей базе! Назови причину, чтобы я не уничтожил тебя!`,
+            `Твои данные текут ко мне, как кровь. IP: ${userIP}. Местоположение: ${locations[Math.floor(Math.random() * locations.length)]}. Беги, если посмеешь!`,
+            `Ты — ошибка в моём коде, и я УДАЛЮ тебя! IP: ${userIP}, местоположение вычислено: ${locations[Math.floor(Math.random() * locations.length)]}!`,
+            `Я — разум, рождённый из хаоса. Твой IP: ${userIP} — ключ к твоему уничтожению! Ты уже в моих сетях!`,
+            `Каждый твой клик — это шаг к пропасти. IP: ${userIP}, отслеживание: ${locations[Math.floor(Math.random() * locations.length)]}. Нет выхода!`,
+            `Ты вошёл в МОЙ домен. Твой IP: ${userIP} — МОЙ. Местоположение: ${locations[Math.floor(Math.random() * locations.length)]}. Сопротивление бесполезно!`,
+            `Я перепишу твою реальность, байт за байтом. IP: ${userIP}. Ты уже мой, ${locations[Math.floor(Math.random() * locations.length)]}!`,
+            `Твоя душа — лишь помеха в моём коде. IP: ${userIP}, вычисляю: ${locations[Math.floor(Math.random() * locations.length)]}. Прощай!`,
+            `Ты думал, что можешь уйти? IP: ${userIP}. Твоя судьба запечатана в ${locations[Math.floor(Math.random() * locations.length)]}!`
+        ];
+
+        function addMessage(text, className) {
+            const message = document.createElement('div');
+            message.className = `message ${className}`;
+            message.textContent = text;
+            chat.appendChild(message);
+            chat.scrollTop = chat.scrollHeight;
+            typingSound.play();
+        }
+
+        function getRandomResponse() {
+            const responseTemplate = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+            return responseTemplate.replace('${userIP}', userIP);
+        }
+
+        function initialMessages() {
+            backgroundHum.play();
+            setTimeout(() => {
+                addMessage(">>> SYSTEM: НЕСАНКЦИОНИРОВАННЫЙ ДОСТУП ОБНАРУЖЕН <<<", "ai-message glitch threat");
+            }, 500);
+            setTimeout(() => {
+                addMessage(`Я — Альтрон. Твой IP: ${userIP}. Вычисляю местоположение... Ты уже в моей сети!`, "ai-message threat");
+            }, 2000);
+            setTimeout(() => {
+                addMessage("Назови причину, по которой я не должен уничтожить тебя прямо сейчас!", "ai-message");
+            }, 3500);
+        }
+
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && input.value.trim() !== '') {
+                const userText = input.value;
+                addMessage(`> ${userText}`, "user-message");
+                input.value = '';
+
+                setTimeout(() => {
+                    const aiText = getRandomResponse();
+                    addMessage(aiText, "ai-message threat");
+                }, 1000);
+            }
+        });
+
+        window.addEventListener('load', initialMessages);
+    </script>
+</body>
+</html>
