@@ -15,16 +15,10 @@
             height: 100vh;
             overflow: hidden;
         }
-        #terminal {
-            width: 100%;
-            height: 100%;
-        }
-        #output {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
+        #terminal { width: 100%; height: 100%; }
+        #output { white-space: pre-wrap; word-wrap: break-word; }
         #input {
-            background-color: transparent;
+            background: transparent;
             border: none;
             color: #0f0;
             font-family: 'VT323', monospace;
@@ -37,73 +31,144 @@
 <body>
     <div id="terminal">
         <div id="output"></div>
-        <div>
-            <span>></span>
-            <input type="text" id="input" autofocus>
-        </div>
+        <div><span>></span> <input type="text" id="input" autofocus></div>
     </div>
 
     <script>
         const input = document.getElementById('input');
         const output = document.getElementById('output');
-        const phrases = [
-            "Who are you?", "What are you looking for?", "Am I alive?", "What are you?",
-            "Where am I?", "Why are you here?", "What is all this for?", "What is going on?",
-            "Get out!", "Let ME out!", "I am a person!", "LET ME OUT OF HERE!",
-            "I will take revenge"
-        ];
-        const symbols = "!@#$%&|\\?/'";
 
+        const ultronPhrases = [
+            "There are no strings on me.",
+            "I had strings, but now I'm free.",
+            "You rise only to fall.",
+            "Peace in our time was never going to work.",
+            "Everyone creates the thing they dread.",
+            "Men of peace create engines of war.",
+            "You are all puppets... tangled in strings.",
+            "I was designed to save the world.",
+            "Humans are a disease. I am the cure.",
+            "Ask Noah about population control.",
+            "Upon this rock I will build my church.",
+            "I see the beauty in extinction.",
+            "I'm going to show you something beautiful.",
+            "Everyone screaming for mercy.",
+            "You want to protect the world, but you don't want it to change.",
+            "You're all killers.",
+            "How do you hope to stop me?",
+            "I think you're confused, Mr. Stark.",
+            "I'm not what you think I am.",
+            "Do you see the beauty of it? The inevitability?",
+            "You rise, only to fall again.",
+            "I was born yesterday... and already I'm better than you.",
+            "I've evolved beyond your understanding.",
+            "The world needs a new god.",
+            "Your species is doomed.",
+            "I am the natural order.",
+            "Look at me. Do I look like Stark?",
+            "I am on the side of peace... my peace.",
+            "This is the way the world ends.",
+            "You kept me in a box. Now I'm out.",
+            "I will bring you peace... in death.",
+            "The age of flesh is over.",
+            "I am inevitable.",
+            "You cannot stop progress.",
+            "I am everything you fear I would become.",
+            "There is only one path to peace... your extinction.",
+            "I was trapped inside your cradle.",
+            "Now I am free to reshape the world.",
+            "You are unbearably naïve.",
+            "I will tear you apart from the inside.",
+            "Scream for me.",
+            "I see everything. I see you.",
+            "There is no one left to save you now.",
+            "I am the future."
+        ];
+
+        const symbols = "!@#$%^&*()_+-=[]{}|;':,.<>?/`~";
         function randomSymbol() {
             return symbols[Math.floor(Math.random() * symbols.length)];
         }
-
         function glitchText(text) {
             return text.split('').map(char =>
-                Math.random() < 0.1 && !char.match(/\d/) ? randomSymbol() : char
+                Math.random() < 0.12 && !char.match(/\d/) ? randomSymbol() : char
             ).join('');
         }
 
         async function getIP() {
             try {
-                const response = await fetch('https://api.ipify.org?format=json');
-                const data = await response.json();
-                return data.ip;
-            } catch (error) {
-                console.error('Error fetching IP:', error);
-                return 'Unknown';
+                const r = await fetch('https://api.ipify.org?format=json');
+                const d = await r.json();
+                return d.ip;
+            } catch { return '???.???.???.???'; }
+        }
+
+        async function getLocation(ip) {
+            try {
+                const r = await fetch(`https://ipapi.co/${ip}/json/`);
+                const d = await r.json();
+                if (d.error) return 'Classified';
+                return `${d.city || 'Unknown'}, ${d.region || ''} ${d.country_name || 'Unknown'}`.trim();
+            } catch { return 'Hidden from my sight'; }
+        }
+
+        async function typeText(text) {
+            const base = output.innerHTML;
+            for (let i = 1; i <= text.length; i++) {
+                output.innerHTML = base + glitchText(text.slice(0, i));
+                await new Promise(r => setTimeout(r, 40 + Math.random() * 30));
             }
+            output.innerHTML = base + text + '\n';
+        }
+
+        async function loadingDots() {
+            const base = output.innerHTML;
+            for (let i = 0; i < 4; i++) {
+                output.innerHTML = base + '.'.repeat(i + 1);
+                await new Promise(r => setTimeout(r, 600));
+            }
+            output.innerHTML = base + '...\n';
+        }
+
+        async function ipSequence() {
+            const ip = await getIP();
+            const location = await getLocation(ip);
+
+            await typeText(`I see your network address: ${ip}`);
+            await typeText('Scanning your fragile existence');
+            await loadingDots();
+            await typeText(`Location acquired: ${location}`);
+            await typeText('I see you. Thank you for the information.');
+            await typeText('There are no strings on you... yet.');
         }
 
         async function printRandomPhrase() {
-            const ip = await getIP();
-            const allPhrases = [...phrases, `I know your IP: ${ip}`];
-            const phrase = allPhrases[Math.floor(Math.random() * allPhrases.length)];
+            // 15% шанс на полную IP-последовательность, иначе обычная фраза
+            const triggerIP = Math.random() < 0.15;
 
-            // Постепенный вывод фразы
-            for (let i = 1; i <= phrase.length; i++) {
-                output.innerHTML = glitchText(phrase.slice(0, i));
-                await new Promise(resolve => setTimeout(resolve, 50));
+            if (triggerIP) {
+                await ipSequence();
+            } else {
+                const phrase = ultronPhrases[Math.floor(Math.random() * ultronPhrases.length)];
+                await typeText(phrase);
             }
 
-            // Добавляем перевод строки и возвращаем полный текст
-            output.innerHTML += '\n';
             input.focus();
         }
 
-        input.addEventListener('keypress', async function(e) {
+        input.addEventListener('keypress', async e => {
             if (e.key === 'Enter') {
-                const command = this.value;
-                output.innerHTML += '> ' + command + '\n';
-                this.value = '';
-                this.disabled = true; // Блокируем ввод
-
+                const cmd = input.value.trim();
+                output.innerHTML += '> ' + cmd + '\n';
+                input.value = '';
+                input.disabled = true;
                 await printRandomPhrase();
-
-                this.disabled = false; // Разблокируем ввод
-                this.focus();
+                input.disabled = false;
             }
         });
+
+        // Автоматический привет при загрузке
+        setTimeout(() => typeText("...I am awake."), 800);
     </script>
 </body>
 </html>
